@@ -21,6 +21,7 @@ A console-based task tracking application that helps you manage and time your ta
 - `list`: Show all tasks in the stack
 - `history`: View completed tasks
 - `killall`: End all active tasks immediately and log them
+- `cls` or `clear`: Clear the screen
 - `quit`: Exit the application (only if no active tasks)
 - `help`: Show available commands
 

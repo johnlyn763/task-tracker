@@ -209,6 +209,13 @@ class TaskTracker(cmd.Cmd):
         """Handle Ctrl+D (EOF)"""
         return self.do_quit(arg)
 
+    def do_cls(self, arg):
+        """Clear the screen"""
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+    # Add alias for cls command
+    do_clear = do_cls
+
 if __name__ == '__main__':
     try:
         TaskTracker().cmdloop()
