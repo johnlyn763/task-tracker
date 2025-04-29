@@ -22,6 +22,7 @@ A console-based task tracking application that helps you manage and time your ta
 - `history`: View completed tasks
 - `killall`: End all active tasks immediately and log them
 - `cls` or `clear`: Clear the screen
+- `export [filename] [days_back]`: Export tasks to CSV (e.g., `export tasks.csv 7` for last week)
 - `quit`: Exit the application (only if no active tasks)
 - `help`: Show available commands
 

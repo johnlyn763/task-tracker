@@ -5,6 +5,7 @@ import json
 import os
 import signal
 import sys
+import csv
 from typing import List, Dict, Optional
 
 class Task:
@@ -39,10 +40,14 @@ class Task:
             return self.elapsed_time
         return self.elapsed_time + (time.time() - self.start_time)
 
-    def format_elapsed_time(self) -> str:
-        total_minutes = int(self.get_elapsed_time() / 60)
-        hours = total_minutes // 60
-        minutes = total_minutes % 60
+    def format_elapsed_time(self, include_seconds: bool = False) -> str:
+        total_seconds = int(self.get_elapsed_time())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        
+        if include_seconds:
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
         return f"{hours:02d}:{minutes:02d}"
 
 class TaskTracker(cmd.Cmd):
@@ -97,7 +102,7 @@ class TaskTracker(cmd.Cmd):
             "task_name": task.name,
             "started_at": task.start_datetime,
             "completed_at": datetime.now().isoformat(),
-            "elapsed_time": task.format_elapsed_time()
+            "elapsed_time": task.format_elapsed_time(include_seconds=True)
         }
 
         existing_entries = []
@@ -215,6 +220,92 @@ class TaskTracker(cmd.Cmd):
 
     # Add alias for cls command
     do_clear = do_cls
+
+    def do_export(self, arg):
+        """Export completed tasks to a CSV file. Usage: export [filename] [days_back]
+        Example: export tasks.csv 7 (exports last 7 days of tasks)
+        If days_back is not specified, exports all tasks."""
+        # Parse arguments
+        args = arg.split()
+        filename = args[0] if args else 'task_summary.csv'
+        if not filename.endswith('.csv'):
+            filename += '.csv'
+        
+        try:
+            days_back = int(args[1]) if len(args) > 1 else None
+        except ValueError:
+            print("Error: days_back must be a number")
+            return
+
+        # Read completed tasks
+        if not os.path.exists(self.log_file):
+            print("No completed tasks found")
+            return
+
+        try:
+            with open(self.log_file, 'r') as f:
+                tasks = json.load(f)
+        except json.JSONDecodeError:
+            print("Error reading task history")
+            return
+
+        # Filter tasks by date if days_back is specified
+        if days_back is not None:
+            cutoff_date = datetime.now() - timedelta(days=days_back)
+            tasks = [
+                task for task in tasks
+                if datetime.fromisoformat(task['started_at']) >= cutoff_date
+            ]
+
+        if not tasks:
+            print("No tasks found in the specified time period")
+            return
+
+        # Sort tasks by start time
+        tasks.sort(key=lambda x: x['started_at'])
+
+        # Write to CSV
+        try:
+            with open(filename, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['Task Name', 'Started At', 'Completed At', 'Time Spent'])
+                
+                for task in tasks:
+                    # Convert ISO timestamps to more readable format
+                    started = datetime.fromisoformat(task['started_at']).strftime('%Y-%m-%d %H:%M')
+                    completed = datetime.fromisoformat(task['completed_at']).strftime('%Y-%m-%d %H:%M')
+                    
+                    # Parse and reformat time to ensure consistent HH:MM:SS format
+                    if ':' in task['elapsed_time']:
+                        parts = task['elapsed_time'].split(':')
+                        if len(parts) == 2:  # HH:MM format
+                            h, m = map(int, parts)
+                            elapsed = f"{h:02d}:{m:02d}:00"
+                        else:  # HH:MM:SS format
+                            h, m, s = map(int, parts)
+                            elapsed = f"{h:02d}:{m:02d}:{s:02d}"
+                    else:
+                        elapsed = task['elapsed_time']  # Handle any legacy format
+                    
+                    writer.writerow([
+                        task['task_name'],
+                        started,
+                        completed,
+                        elapsed
+                    ])
+
+            print(f"\nExported {len(tasks)} tasks to {filename}")
+            
+            # Calculate and show some basic statistics
+            total_tasks = len(tasks)
+            unique_days = len(set(datetime.fromisoformat(t['started_at']).date() for t in tasks))
+            print(f"Summary:")
+            print(f"- Total tasks: {total_tasks}")
+            print(f"- Unique days: {unique_days}")
+            print(f"- Tasks per day: {total_tasks/unique_days:.1f}")
+            
+        except Exception as e:
+            print(f"Error writing CSV file: {e}")
 
 if __name__ == '__main__':
     try:
