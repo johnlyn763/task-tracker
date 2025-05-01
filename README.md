@@ -14,6 +14,13 @@ A console-based task tracking application that helps you manage and time your ta
 
 ## Commands
 
+### Quick Task Creation
+You can start a new task by simply typing its name. For example:
+```
+no active task> Write documentation  # Same as: start "Write documentation"
+```
+
+### All Commands
 - `start <task_name>`: Start a new task (pushes current task to stack if one exists)
 - `done`: Complete current task and resume previous task
 - `pause`: Pause the current task's timer (e.g., for breaks)

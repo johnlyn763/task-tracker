@@ -214,6 +214,22 @@ class TaskTracker(cmd.Cmd):
         """Handle Ctrl+D (EOF)"""
         return self.do_quit(arg)
 
+    def default(self, line):
+        """Handle unknown commands by treating them as new task names"""
+        # Don't treat empty lines as tasks
+        if not line.strip():
+            return
+            
+        # Check if the line starts with any known command
+        known_commands = ['start', 'done', 'pause', 'resume', 'list', 'history', 'killall', 'cls', 'clear', 'export', 'quit', 'help', '?']
+        if any(line.startswith(cmd) for cmd in known_commands):
+            print(f"*** Unknown syntax: {line}")
+            return
+
+        # Treat the input as a task name
+        print(f"Starting task: {line}")
+        self.do_start(line)
+
     def do_cls(self, arg):
         """Clear the screen"""
         os.system('cls' if os.name == 'nt' else 'clear')
