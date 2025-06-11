@@ -21,10 +21,15 @@ no active task> Write documentation  # Same as: start "Write documentation"
 ```
 
 ### All Commands
-- `start <task_name>`: Start a new task (pushes current task to stack if one exists)
+- `start <task_name> [description]`: Start a new task with optional description (pushes current task to stack if one exists)
 - `done`: Complete current task and resume previous task
 - `pause`: Pause the current task's timer (e.g., for breaks)
 - `resume`: Resume a paused task
+- `edit name <new_name>`: Edit the current task's name
+- `edit desc <description>`: Add or change the current task's description
+- `edit <new_name>`: Quick way to rename current task
+- `info`: Show detailed information about the current task
+- `undo`: Undo the last action (start, done, edit, etc.)
 - `list`: Show all tasks in the stack
 - `history`: View completed tasks
 - `killall`: End all active tasks immediately and log them
@@ -32,6 +37,18 @@ no active task> Write documentation  # Same as: start "Write documentation"
 - `export [filename] [days_back]`: Export tasks to CSV (e.g., `export tasks.csv 7` for last week)
 - `quit`: Exit the application (only if no active tasks)
 - `help`: Show available commands
+
+## New Features ✨
+
+### Task Editing
+- **Edit task names**: Fix typos or clarify task names while working
+- **Add descriptions**: Provide additional context for your tasks
+- **Undo functionality**: Accidentally completed a task? Just type `undo`!
+
+### Enhanced Task Information
+- Tasks now support optional descriptions for better context
+- The `info` command shows detailed task information
+- Task history includes descriptions when available
 
 ## Installation
 
@@ -78,3 +95,4 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
